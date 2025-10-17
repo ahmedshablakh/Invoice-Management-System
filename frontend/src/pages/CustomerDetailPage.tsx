@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { customerAPI, invoiceAPI } from '../services/api';
 import { Customer, Invoice } from '../types';
 import { Button, Card, Loading, Toast } from '../components';
+import { useTranslation } from 'react-i18next';
 
 // Responsive CustomerDetailPage
 // - Layout stacks on small screens, becomes two-column on md+
@@ -10,6 +11,7 @@ import { Button, Card, Loading, Toast } from '../components';
 // - Buttons and actions are touch-friendly and full-width on xs
 
 export const CustomerDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
@@ -31,7 +33,7 @@ export const CustomerDetailPage: React.FC = () => {
       const data = await customerAPI.getById(customerId);
       setCustomer(data);
     } catch (error) {
-      setToast({ message: 'Failed to fetch customer details', type: 'error' });
+  setToast({ message: t('messages.fetchCustomerFailed', 'Failed to fetch customer details'), type: 'error' });
       setTimeout(() => navigate('/customers'), 2000);
     } finally {
       setLoading(false);
@@ -81,18 +83,18 @@ export const CustomerDetailPage: React.FC = () => {
     if (!id || !customer) return;
 
     const confirmed = window.confirm(
-      `Are you sure you want to delete ${customer.name}? This will also delete all associated invoices.`
+      t('messages.confirmDeleteCustomerWithName', 'Are you sure you want to delete {{name}}? This will also delete all associated invoices.', { name: customer.name })
     );
 
     if (!confirmed) return;
 
     try {
       await customerAPI.delete(id);
-      setToast({ message: 'Customer deleted successfully!', type: 'success' });
+  setToast({ message: t('messages.customerDeleted', 'Customer deleted successfully!'), type: 'success' });
       setTimeout(() => navigate('/customers'), 1000);
     } catch (error: any) {
       setToast({
-        message: error.response?.data?.error || 'Failed to delete customer',
+        message: error.response?.data?.error || t('messages.deleteCustomerFailed', 'Failed to delete customer'),
         type: 'error',
       });
     }

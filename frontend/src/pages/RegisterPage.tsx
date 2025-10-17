@@ -5,8 +5,10 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
 import { Toast } from '../components/Toast';
+import { useTranslation } from 'react-i18next';
 
 export const RegisterPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
@@ -36,10 +38,10 @@ export const RegisterPage: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
+      newErrors.password = t('auth.passwordMinLength', 'Password must be at least 6 characters long');
     }
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('auth.passwordsNotMatch', 'Passwords do not match');
     }
 
     setErrors(newErrors);
@@ -59,10 +61,10 @@ export const RegisterPage: React.FC = () => {
 
     try {
       await register(formData.email, formData.password, formData.name);
-      setToast({ message: 'Registration successful! Redirecting...', type: 'success' });
+  setToast({ message: t('messages.registrationSuccess', 'Registration successful! Redirecting...'), type: 'success' });
       setTimeout(() => navigate('/'), 1500);
     } catch (error: any) {
-      setToast({ message: error.message || 'Registration failed', type: 'error' });
+  setToast({ message: error.message || t('messages.registrationFailed', 'Registration failed'), type: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -73,42 +75,41 @@ export const RegisterPage: React.FC = () => {
       {/* MODIFIED: Added animation classes */}
       <div className="max-w-md w-full transition-all duration-500 ease-in-out transform animate-fadeIn">
         <div className="text-center mb-8">
-          {/* MODIFIED: Responsive typography */}
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Invoice Manager</h1>
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-700">Create your account</h2>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{t('common.appName', 'Invoice Manager')}</h1>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-700">{t('auth.registerTitle', 'Create your account')}</h2>
         </div>
 
         <Card>
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
-              label="Full Name"
+              label={t('auth.fullName', 'Full Name')}
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="John Doe"
+              placeholder={t('auth.namePlaceholder', 'John Doe')}
               required
               autoComplete="name"
             />
 
             <Input
-              label="Email address"
+              label={t('common.email', 'Email address')}
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="you@example.com"
+              placeholder={t('auth.emailPlaceholder', 'you@example.com')}
               required
               autoComplete="email"
             />
 
             <Input
-              label="Password"
+              label={t('common.password', 'Password')}
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder={t('auth.passwordPlaceholder', '••••••••')}
               required
               autoComplete="new-password"
               // MODIFIED: Displaying inline error
@@ -116,12 +117,12 @@ export const RegisterPage: React.FC = () => {
             />
 
             <Input
-              label="Confirm Password"
+              label={t('auth.confirmPassword', 'Confirm Password')}
               type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder={t('auth.passwordPlaceholder', '••••••••')}
               required
               autoComplete="new-password"
               // MODIFIED: Displaying inline error
@@ -129,15 +130,15 @@ export const RegisterPage: React.FC = () => {
             />
 
             <Button type="submit" variant="primary" fullWidth isLoading={isLoading}>
-              {isLoading ? 'Creating account...' : 'Sign up'}
+              {isLoading ? t('auth.creatingAccount', 'Creating account...') : t('auth.signUp', 'Sign up')}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
+              {t('auth.hasAccount', 'Already have an account?')}{' '}
               <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                Sign in
+                {t('auth.signIn', 'Sign in')}
               </Link>
             </p>
           </div>

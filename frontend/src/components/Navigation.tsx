@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './Button';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false); // State to control the mobile menu
 
   const isActive = (path: string) => {
@@ -49,10 +52,10 @@ export const Navigation: React.FC = () => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
                 <Link to="/customers" className={linkClasses('/customers')}>
-                  Customers
+                  {t('navigation.customers')}
                 </Link>
                 <Link to="/invoices" className={linkClasses('/invoices')}>
-                  Invoices
+                  {t('navigation.invoices')}
                 </Link>
               </div>
             </div>
@@ -60,10 +63,11 @@ export const Navigation: React.FC = () => {
 
           {/* User Info and Logout Button for Desktop - Hidden on small screens */}
           <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher />
             {user && (
               <>
                 <span className="text-white text-sm">
-                  Welcome, <span className="font-semibold">{user.name}</span>
+                  {t('common.welcome', 'Welcome')}, <span className="font-semibold">{user.name}</span>
                 </span>
                 <Button
                   variant="secondary"
@@ -71,7 +75,7 @@ export const Navigation: React.FC = () => {
                   onClick={handleLogout}
                   className="!text-blue-600 !bg-white hover:!bg-blue-100"
                 >
-                  Logout
+                  {t('common.logout')}
                 </Button>
               </>
             )}
@@ -86,7 +90,7 @@ export const Navigation: React.FC = () => {
               aria-controls="mobile-menu"
               aria-expanded="false"
             >
-              <span className="sr-only">Open main menu</span>
+              <span className="sr-only">{isOpen ? t('common.closeMenu', 'Close menu') : t('common.openMenu', 'Open menu')}</span>
               {/* Icon for menu (hamburger) or close (X) */}
               {!isOpen ? (
                 <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -107,10 +111,10 @@ export const Navigation: React.FC = () => {
         <div className="md:hidden" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link to="/customers" className={mobileLinkClasses('/customers')} onClick={() => setIsOpen(false)}>
-              Customers
+              {t('navigation.customers')}
             </Link>
             <Link to="/invoices" className={mobileLinkClasses('/invoices')} onClick={() => setIsOpen(false)}>
-              Invoices
+              {t('navigation.invoices')}
             </Link>
           </div>
           {/* User Info and Logout for Mobile */}

@@ -7,8 +7,10 @@ import { Card } from '../components/Card';
 import { Loading } from '../components/Loading';
 import { Toast } from '../components/Toast';
 import { formatCurrency, formatDate, getStatusColor } from '../utils/helpers';
+import { useTranslation } from 'react-i18next';
 
 export const InvoiceDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -28,7 +30,7 @@ export const InvoiceDetailPage: React.FC = () => {
       const data = await invoiceAPI.getById(invoiceId);
       setInvoice(data);
     } catch (error) {
-      setToast({ message: 'Failed to fetch invoice', type: 'error' });
+  setToast({ message: t('messages.fetchInvoiceFailed', 'Failed to fetch invoice'), type: 'error' });
       setTimeout(() => navigate('/invoices'), 2000);
     } finally {
       setLoading(false);
@@ -36,14 +38,14 @@ export const InvoiceDetailPage: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (!id || !window.confirm('Are you sure you want to delete this invoice?')) return;
+  if (!id || !window.confirm(t('messages.confirmDeleteInvoice', 'Are you sure you want to delete this invoice?'))) return;
 
     try {
       await invoiceAPI.delete(id);
-      setToast({ message: 'Invoice deleted successfully!', type: 'success' });
+  setToast({ message: t('messages.invoiceDeleted', 'Invoice deleted successfully!'), type: 'success' });
       setTimeout(() => navigate('/invoices'), 1000);
     } catch (error) {
-      setToast({ message: 'Failed to delete invoice', type: 'error' });
+  setToast({ message: t('messages.deleteInvoiceFailed', 'Failed to delete invoice'), type: 'error' });
     }
   };
 
@@ -64,9 +66,9 @@ export const InvoiceDetailPage: React.FC = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
       
-      setToast({ message: 'PDF downloaded successfully!', type: 'success' });
+  setToast({ message: t('messages.pdfDownloaded', 'PDF downloaded successfully!'), type: 'success' });
     } catch (error) {
-      setToast({ message: 'Failed to download PDF', type: 'error' });
+  setToast({ message: t('messages.pdfDownloadFailed', 'Failed to download PDF'), type: 'error' });
     } finally {
       setIsDownloadingPDF(false);
     }

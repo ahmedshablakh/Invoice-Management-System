@@ -9,6 +9,7 @@ import { Card } from '../components/Card';
 import { Loading } from '../components/Loading';
 import { Toast } from '../components/Toast';
 import { formatCurrency, formatDate, getStatusColor } from '../utils/helpers';
+import { useTranslation } from 'react-i18next';
 
 // Responsive InvoiceListPage
 // - Filters stack on small screens and form a grid on md+
@@ -16,6 +17,7 @@ import { formatCurrency, formatDate, getStatusColor } from '../utils/helpers';
 // - Actions become touch-friendly buttons, stacked on very small screens
 
 export const InvoiceListPage: React.FC = () => {
+  const { t } = useTranslation();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadingPDFs, setDownloadingPDFs] = useState<Set<string>>(new Set());
@@ -43,7 +45,7 @@ export const InvoiceListPage: React.FC = () => {
       const data = await invoiceAPI.getAll(cleanFilters);
       setInvoices(data);
     } catch (error) {
-      setToast({ message: 'Failed to fetch invoices', type: 'error' });
+  setToast({ message: t('messages.fetchInvoicesFailed', 'Failed to fetch invoices'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -67,14 +69,14 @@ export const InvoiceListPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this invoice?')) return;
+  if (!window.confirm(t('messages.confirmDeleteInvoice', 'Are you sure you want to delete this invoice?'))) return;
 
     try {
       await invoiceAPI.delete(id);
-      setToast({ message: 'Invoice deleted successfully!', type: 'success' });
+  setToast({ message: t('messages.invoiceDeleted', 'Invoice deleted successfully!'), type: 'success' });
       fetchInvoices(filters);
     } catch (error) {
-      setToast({ message: 'Failed to delete invoice', type: 'error' });
+  setToast({ message: t('messages.deleteInvoiceFailed', 'Failed to delete invoice'), type: 'error' });
     }
   };
 
@@ -92,9 +94,9 @@ export const InvoiceListPage: React.FC = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      setToast({ message: 'PDF downloaded successfully!', type: 'success' });
+  setToast({ message: t('messages.pdfDownloaded', 'PDF downloaded successfully!'), type: 'success' });
     } catch (error) {
-      setToast({ message: 'Failed to download PDF', type: 'error' });
+  setToast({ message: t('messages.pdfDownloadFailed', 'Failed to download PDF'), type: 'error' });
     } finally {
       setDownloadingPDFs(prev => {
         const newSet = new Set(prev);
@@ -118,9 +120,9 @@ export const InvoiceListPage: React.FC = () => {
 
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Invoices</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('invoice.title', 'Invoices')}</h1>
           <Link to="/invoices/new" className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">+ New Invoice</Button>
+            <Button className="w-full sm:w-auto">+ {t('invoice.newInvoice', 'New Invoice')}</Button>
           </Link>
         </div>
 
@@ -128,7 +130,7 @@ export const InvoiceListPage: React.FC = () => {
           {/* Filters: responsive grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <Input
-              placeholder="Search by customer, number..."
+              placeholder={t('invoice.searchPlaceholder', 'Search by customer, number...')}
               value={filters.search || ''}
               onChange={(e) => handleFilterChange('search', e.target.value)}
               className="w-full"
@@ -136,11 +138,11 @@ export const InvoiceListPage: React.FC = () => {
 
             <Select
               options={[
-                { value: '', label: 'All Statuses' },
-                { value: 'DRAFT', label: 'Draft' },
-                { value: 'SENT', label: 'Sent' },
-                { value: 'PAID', label: 'Paid' },
-                { value: 'CANCELLED', label: 'Cancelled' },
+                { value: '', label: t('invoice.allStatuses', 'All Statuses') },
+                { value: 'DRAFT', label: t('invoice.statuses.DRAFT', 'Draft') },
+                { value: 'SENT', label: t('invoice.statuses.SENT', 'Sent') },
+                { value: 'PAID', label: t('invoice.statuses.PAID', 'Paid') },
+                { value: 'CANCELLED', label: t('invoice.statuses.CANCELLED', 'Cancelled') },
               ]}
               value={filters.status || ''}
               onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
@@ -148,10 +150,10 @@ export const InvoiceListPage: React.FC = () => {
 
             <Select
               options={[
-                { value: 'date', label: 'Sort by Date' },
-                { value: 'dueDate', label: 'Sort by Due Date' },
-                { value: 'totalAmount', label: 'Sort by Amount' },
-                { value: 'number', label: 'Sort by Number' },
+                { value: 'date', label: t('invoice.sort.date', 'Sort by Date') },
+                { value: 'dueDate', label: t('invoice.sort.dueDate', 'Sort by Due Date') },
+                { value: 'totalAmount', label: t('invoice.sort.amount', 'Sort by Amount') },
+                { value: 'number', label: t('invoice.sort.number', 'Sort by Number') },
               ]}
               value={filters.sortBy || 'date'}
               onChange={(e) => handleFilterChange('sortBy', e.target.value)}
@@ -159,8 +161,8 @@ export const InvoiceListPage: React.FC = () => {
 
             <Select
               options={[
-                { value: 'desc', label: 'Descending' },
-                { value: 'asc', label: 'Ascending' },
+                { value: 'desc', label: t('common.desc', 'Descending') },
+                { value: 'asc', label: t('common.asc', 'Ascending') },
               ]}
               value={filters.sortOrder || 'desc'}
               onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
@@ -169,7 +171,7 @@ export const InvoiceListPage: React.FC = () => {
 
           <div className="mt-4 flex justify-start">
             <Button variant="secondary" size="sm" onClick={handleClearFilters}>
-              Clear Filters
+              {t('invoice.clearFilters', 'Clear Filters')}
             </Button>
           </div>
         </Card>
@@ -177,7 +179,7 @@ export const InvoiceListPage: React.FC = () => {
 
       {invoices.length === 0 ? (
         <Card>
-          <p className="text-center text-gray-500 py-8">No invoices found. Create your first invoice to get started!</p>
+          <p className="text-center text-gray-500 py-8">{t('invoice.noInvoices', 'No invoices found. Create your first invoice to get started!')}</p>
         </Card>
       ) : (
         <>
@@ -186,13 +188,13 @@ export const InvoiceListPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('invoice.invoiceNumber', 'Invoice #')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.customer', 'Customer')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('invoice.date', 'Date')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('invoice.dueDate', 'Due Date')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('invoice.amount', 'Amount')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('invoice.status', 'Status')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.actions', 'Actions')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -210,11 +212,11 @@ export const InvoiceListPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex gap-2 justify-end">
-                        <Button size="sm" variant="success" onClick={() => handleDownloadPDF(invoice)} isLoading={downloadingPDFs.has(invoice.id)}>PDF</Button>
-                      
-                      <Button size="sm" variant="danger" onClick={() => handleDelete(invoice.id)}>Delete</Button>
-                      <Link to={`/invoices/${invoice.id}`}><Button size="sm" variant="secondary">View</Button></Link>
-                      <Link to={`/invoices/${invoice.id}/edit`}><Button size="sm" variant="secondary">Edit</Button></Link>
+                        <Button size="sm" variant="success" onClick={() => handleDownloadPDF(invoice)} isLoading={downloadingPDFs.has(invoice.id)}>{t('invoice.pdf', 'PDF')}</Button>
+
+                      <Button size="sm" variant="danger" onClick={() => handleDelete(invoice.id)}>{t('common.delete', 'Delete')}</Button>
+                      <Link to={`/invoices/${invoice.id}`}><Button size="sm" variant="secondary">{t('common.view', 'View')}</Button></Link>
+                      <Link to={`/invoices/${invoice.id}/edit`}><Button size="sm" variant="secondary">{t('common.edit', 'Edit')}</Button></Link>
                       </div>
                     </td>
                   </tr>

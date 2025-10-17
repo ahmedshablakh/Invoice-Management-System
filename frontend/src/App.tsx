@@ -1,5 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import './i18n';
 import { Navigation } from './components/Navigation';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { HomePage } from './pages/HomePage';
@@ -12,6 +15,13 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 
 function App() {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    // تحديث اتجاه الصفحة عند تغيير اللغة
+    document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+  }, [i18n.language]);
+
   return (
     <Router>
       <AuthProvider>

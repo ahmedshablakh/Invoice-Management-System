@@ -1,0 +1,124 @@
+{
+  "common": {
+    "appName": "مدير الفواتير",
+    "welcome": "مرحبًا",
+    "login": "تسجيل الدخول",
+    "register": "اشتراك",
+    "logout": "تسجيل خروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "view": "عرض",
+    "clear": "مسح",
+    "address": "العنوان",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة",
+    "language": "اللغة"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "customers": "العملاء",
+    "invoices": "الفواتير",
+    "settings": "الإعدادات"
+  },
+  "customer": {
+    "title": "العملاء",
+    "newCustomer": "عميل جديد",
+    "name": "الاسم",
+    "address": "العنوان",
+    "phone": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني أو رقم الضريبة...",
+    "noCustomers": "لم يتم العثور على أي عملاء. أنشئ عميلك الأول!",
+    "createModalTitle": "إنشاء عميل جديد",
+    "taxNumber": "رقم الضريبة",
+    "create": "إنشاء العميل"
+  },
+  "invoice": {
+    "title": "الفواتير",
+    "newInvoice": "فاتورة جديدة",
+    "invoiceNumber": "رقم الفاتورة",
+    "date": "التاريخ",
+    "dueDate": "تاريخ الاستحقاق",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "customer": "العميل",
+    "items": "العناصر",
+    "total": "الإجمالي"
+    ,
+    "searchPlaceholder": "ابحث بالعميل أو الرقم...",
+    "allStatuses": "جميع الحالات",
+    "statuses": {
+      "DRAFT": "مسودة",
+      "SENT": "مرسلة",
+      "PAID": "مدفوع",
+      "CANCELLED": "ملغاة"
+    },
+    "sort": {
+      "date": "الترتيب حسب التاريخ",
+      "dueDate": "الترتيب حسب تاريخ الاستحقاق",
+      "amount": "الترتيب حسب المبلغ",
+      "number": "الترتيب حسب الرقم"
+    },
+    "clearFilters": "مسح الفلاتر",
+    "noInvoices": "لم يتم العثور على فواتير. أنشئ فاتورتك الأولى!",
+    "pdf": "PDF"
+  },
+  "messages": {
+    "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
+    "saveSuccess": "تم الحفظ بنجاح!",
+    "deleteSuccess": "تم الحذف بنجاح!",
+    "error": "حدث خطأ",
+    "loginSuccess": "تم تسجيل الدخول بنجاح!",
+    "loginFailed": "فشل تسجيل الدخول",
+    "fetchCustomersFailed": "فشل جلب العملاء",
+    "customerCreated": "تم إنشاء العميل بنجاح!",
+    "createCustomerFailed": "فشل إنشاء العميل",
+    "confirmDeleteCustomer": "هل أنت متأكد أنك تريد حذف هذا العميل؟",
+    "customerDeleted": "تم حذف العميل بنجاح!",
+    "deleteCustomerFailed": "فشل حذف العميل"
+  },
+  "auth": {
+    "loginTitle": "سجل الدخول إلى حسابك",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "••••••••",
+    "signIn": "تسجيل الدخول",
+    "signingIn": "جاري تسجيل الدخول...",
+    "noAccount": "لا تملك حسابًا؟",
+    "signUp": "اشتراك"
+    ,
+    "confirmPassword": "تأكيد كلمة المرور",
+    "passwordMinLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+    "passwordsNotMatch": "كلمات المرور غير متطابقة",
+    "registerTitle": "إنشاء حساب جديد",
+    "fullName": "الاسم الكامل",
+    "namePlaceholder": "John Doe",
+    "hasAccount": "هل لديك حساب بالفعل؟"
+  },
+  "register": {
+    "registerTitle": "إنشاء حساب جديد",
+    "fullName": "الاسم الكامل",
+    "namePlaceholder": "John Doe",
+    "passwordMinLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+    "passwordsNotMatch": "كلمات المرور غير متطابقة",
+    "creatingAccount": "جاري إنشاء الحساب...",
+    "registrationSuccess": "تم التسجيل بنجاح! جاري التوجيه...",
+    "registrationFailed": "فشل التسجيل",
+    "hasAccount": "هل لديك حساب بالفعل؟"
+  },
+  "home": {
+    "welcome": "مرحبًا بك في {{app}}",
+    "subtitle": "قم بإدارة عملائك وفواتيرك بسهولة",
+    "customersDesc": "إدارة قاعدة عملائك مع البحث والتصفية",
+    "invoicesDesc": "إنشاء وتحرير وتتبع الفواتير مع عناصر مفصلة",
+    "viewCustomers": "عرض العملاء",
+    "viewInvoices": "عرض الفواتير",
+    "quickActions": "إجراءات سريعة"
+  }
+}

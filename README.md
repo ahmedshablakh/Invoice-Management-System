@@ -2,7 +2,8 @@
 
 A full-stack invoice management application with **JWT Authentication**, **PDF Export**, and complete invoice management features. Built with Node.js, TypeScript, Express, PostgreSQL, React, and Vite.
 
-## � Key Features
+
+## 🌍 Key Features
 
 ### 🔐 Authentication & Security
 - **JWT Authentication** - Secure token-based authentication
@@ -10,6 +11,12 @@ A full-stack invoice management application with **JWT Authentication**, **PDF E
 - **Protected Routes** - Frontend and backend route protection
 - **Password Hashing** - bcrypt with salt rounds
 - **Auth Middleware** - Automatic token validation
+
+### 🌐 Multi-language Support (i18n)
+- **Full multi-language UI**: English, Arabic (RTL), Turkish
+- **Language Switcher**: Instantly switch UI language from the navigation bar
+- **All pages fully translated** (login, register, customers, invoices, etc.)
+- **Arabic font (Cairo) and RTL support** for Arabic interface
 
 ### 📄 PDF Export
 - **Professional PDF Generation** - Generate branded invoice PDFs
@@ -33,6 +40,9 @@ A full-stack invoice management application with **JWT Authentication**, **PDF E
 ### Frontend
 - React with Vite and TypeScript
 - Tailwind CSS for styling
+- **Multi-language support (i18next, react-i18next)**
+- **LanguageSwitcher component** for instant language change
+- **Arabic font (Cairo) and RTL CSS**
 - **Login & Registration pages**
 - **Protected routes with AuthContext**
 - **JWT token management**
@@ -45,15 +55,23 @@ A full-stack invoice management application with **JWT Authentication**, **PDF E
 
 ## 🛠️ Tech Stack
 
+
 ### Backend
 - **Runtime:** Node.js 20.x
 - **Language:** TypeScript 5.x
 - **Framework:** Express.js 4.x
 - **Database:** PostgreSQL 15
 - **ORM:** Prisma 5.x
-- **Authentication:** JWT (jsonwebtoken) + bcrypt
+- **Authentication:** JWT (jsonwebtoken) + bcryptjs
 - **PDF Generation:** PDFKit
 - **Testing:** Jest + Supertest
+- **Other:**
+  - @prisma/client
+  - cors
+  - dotenv
+  - i18next, i18next-express-middleware, i18next-fs-backend
+  - tsx (dev)
+  - types for Node, Express, JWT, Jest, etc.
 
 ### Frontend
 - **Framework:** React 18.x
@@ -62,6 +80,13 @@ A full-stack invoice management application with **JWT Authentication**, **PDF E
 - **Language:** TypeScript 5.x
 - **Routing:** React Router 6.x
 - **State Management:** React Context (Auth)
+- **Internationalization:** i18next, react-i18next, i18next-browser-languagedetector
+- **HTTP Client:** axios
+- **Font:** @fontsource/cairo
+- **Other:**
+  - bcryptjs (for demo password hashing)
+  - eslint, @typescript-eslint, autoprefixer, postcss (dev)
+  - types for React, ReactDOM, etc.
 
 ## 📁 Project Structure
 
@@ -69,11 +94,11 @@ A full-stack invoice management application with **JWT Authentication**, **PDF E
 invoice-management-system/
 ├── backend/
 │   ├── src/
-│   │   ├── routes/          # API routes (auth, customers, invoices)
-│   │   ├── controllers/     # Request handlers
-│   │   ├── services/        # Business logic (auth, invoice, PDF)
-│   │   ├── repositories/    # Data access layer (user, customer, invoice)
+│   │   ├── controllers/     # Request handlers (auth, customer, invoice)
 │   │   ├── middleware/      # JWT authentication middleware
+│   │   ├── repositories/    # Data access layer (user, customer, invoice)
+│   │   ├── routes/          # API routes (auth, customers, invoices)
+│   │   ├── services/        # Business logic (auth, invoice, PDF)
 │   │   ├── types/           # TypeScript types & DTOs
 │   │   └── app.ts           # Main application
 │   ├── prisma/
@@ -84,12 +109,17 @@ invoice-management-system/
 │   └── package.json
 ├── frontend/
 │   ├── src/
-│   │   ├── components/      # React components (Button, Card, etc.)
-│   │   ├── pages/           # Page components (Login, Invoices, etc.)
+│   │   ├── components/      # React components (Button, Card, LanguageSwitcher, etc.)
 │   │   ├── context/         # AuthContext for JWT state management
+│   │   ├── i18n/
+│   │   │   ├── index.ts     # i18n initialization (i18next, react-i18next)
+│   │   │   └── locales/     # Translation files (en.json, ar.json, tr.json)
+│   │   ├── pages/           # Page components (Login, Register, Invoices, Customers, etc.)
 │   │   ├── services/        # API client with auth headers
 │   │   ├── types/           # TypeScript types
 │   │   ├── utils/           # Helper functions
+│   │   ├── index.css        # Global styles (Tailwind, font, RTL)
+│   │   ├── main.tsx         # App entry point
 │   │   └── App.tsx          # Main app with protected routes
 │   └── package.json
 ├── docker-compose.yml       # PostgreSQL container config
@@ -132,84 +162,85 @@ You should see the `invoice-db` container running.
 
 #### 3. Setup Backend
 
-Navigate to the backend directory:
+1. **Navigate to the backend directory:**
+  ```bash
+  cd backend
+  ```
 
-```bash
-cd backend
-```
+2. **Install dependencies:**
+  ```bash
+  npm install
+  ```
 
-Install dependencies:
+3. **Configure environment variables:**
+  - Copy `.env.example` to `.env` and update values as needed (database URL, JWT secret, etc.).
+  - Example:
+    ```bash
+    cp .env.example .env
+    # Then edit .env with your settings
+    ```
 
-```bash
-npm install
-```
+4. **Generate Prisma client:**
+  ```bash
+  npm run prisma:generate
+  ```
 
-Install bcryptjs (for password hashing and verification):
-```bash
-npm install bcryptjs
-```
-Generate Prisma client:
+5. **Run database migrations:**
+  ```bash
+  npm run prisma:migrate
+  ```
 
-```bash
-npm run prisma:generate
-```
+6. **Seed the database with sample data** (creates sample user, customers, and invoices):
+  ```bash
+  npm run prisma:seed
+  ```
 
-Run database migrations:
+  **Sample Login Credentials (created by seed):**
+  - Email: `admin@example.com`
+  - Password: `admin123`
 
-```bash
-npm run prisma:migrate
-```
+7. **Start the backend development server:**
+  ```bash
+  npm run dev
+  ```
 
-Seed the database with sample data (creates sample user, customers, and invoices):
-
-```bash
-npm run prisma:seed
-```
-
-**Sample Login Credentials (created by seed):**
-- Email: `admin@example.com`
-- Password: `admin123`
-
-Start the backend development server:
-
-```bash
-npm run dev
-```
+The backend API will be available at `http://localhost:3001`.
 
 The backend API will be available at `http://localhost:3001` (Note: Port 3001, not 3000)
 
 #### 4. Setup Frontend
 
-Open a new terminal and navigate to the frontend directory:
+1. **Open a new terminal and navigate to the frontend directory:**
+  ```bash
+  cd frontend
+  ```
 
-```bash
-cd frontend
-```
+2. **Install dependencies:**
+  ```bash
+  npm install
+  ```
 
-Install dependencies:
+3. **(Optional) Configure environment variables:**
+  - If you need to change the backend API URL or other settings, copy `.env.example` to `.env` and update as needed.
+  - By default, the frontend expects the backend at `http://localhost:3001`.
 
-```bash
-npm install
-```
+4. **Start the frontend development server:**
+  ```bash
+  npm run dev
+  ```
 
-Start the frontend development server:
-
-```bash
-npm run dev
-```
-
-The frontend will be available at `http://localhost:5173`
+  The frontend will be available at `http://localhost:5173`.
 
 #### 5. Access the Application
 
-1. Open your browser and navigate to `http://localhost:5173`
-2. **Register a new account** OR **Login with seed credentials:**
-   - Email: `admin@example.com`
-   - Password: `admin123`
-3. You'll be redirected to the home page after successful login
-4. All routes are protected - you must be logged in to access them
+1. Open your browser and go to `http://localhost:5173`
+2. **Register a new account** or **Login with seed credentials:**
+  - Email: `admin@example.com`
+  - Password: `admin123`
+3. After successful login, you will be redirected to the home page.
+4. All routes are protected—login is required to access any page.
 
-**Important:** Make sure the backend is running on `http://localhost:3001` before starting the frontend, as the frontend makes API calls to the backend.
+**Note:** Ensure the backend is running at `http://localhost:3001` before starting the frontend, as the frontend relies on the backend API.
 
 ## 🧪 Running Tests
 

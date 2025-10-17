@@ -8,8 +8,10 @@ import {
   calculateInvoiceTotal,
   generateInvoiceNumber,
 } from '../utils/helpers';
+import { useTranslation } from 'react-i18next';
 
 export const InvoiceFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
@@ -23,7 +25,7 @@ export const InvoiceFormPage: React.FC = () => {
     number: generateInvoiceNumber(),
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: 'DRAFT',
+    status: InvoiceStatus.DRAFT,
     totalAmount: 0,
     items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
   });
@@ -42,7 +44,7 @@ export const InvoiceFormPage: React.FC = () => {
       const data = await customerAPI.getAll();
       setCustomers(data);
     } catch (error) {
-      setToast({ message: 'Failed to fetch customers', type: 'error' });
+    setToast({ message: t('messages.fetchCustomersFailed', 'Failed to fetch customers'), type: 'error' });
     }
   };
 
@@ -53,8 +55,8 @@ export const InvoiceFormPage: React.FC = () => {
       setFormData({
         customerId: invoice.customerId,
         number: invoice.number,
-        date: invoice.date.split('T')[0],
-        dueDate: invoice.dueDate.split('T')[0],
+        date: (invoice.date instanceof Date ? invoice.date : new Date(invoice.date)).toISOString().split('T')[0],
+        dueDate: (invoice.dueDate instanceof Date ? invoice.dueDate : new Date(invoice.dueDate)).toISOString().split('T')[0],
         status: invoice.status,
         totalAmount: Number(invoice.totalAmount),
         items: invoice.items.map((item) => ({
@@ -65,7 +67,7 @@ export const InvoiceFormPage: React.FC = () => {
         })),
       });
     } catch (error) {
-      setToast({ message: 'Failed to fetch invoice', type: 'error' });
+  setToast({ message: t('messages.fetchInvoiceFailed', 'Failed to fetch invoice'), type: 'error' });
       navigate('/invoices');
     } finally {
       setLoading(false);
@@ -95,7 +97,7 @@ export const InvoiceFormPage: React.FC = () => {
 
   const removeItem = (index: number) => {
     if (formData.items.length === 1) {
-      setToast({ message: 'Invoice must have at least one item', type: 'error' });
+      setToast({ message: t('invoice.errors.minOneItem', 'Invoice must have at least one item'), type: 'error' });
       return;
     }
 
@@ -108,30 +110,30 @@ export const InvoiceFormPage: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.customerId) {
-      newErrors.customerId = 'Customer is required';
+      newErrors.customerId = t('invoice.errors.customerRequired', 'Customer is required');
     }
 
     if (!formData.number.trim()) {
-      newErrors.number = 'Invoice number is required';
+      newErrors.number = t('invoice.errors.numberRequired', 'Invoice number is required');
     }
 
     if (!formData.date) {
-      newErrors.date = 'Invoice date is required';
+      newErrors.date = t('invoice.errors.dateRequired', 'Invoice date is required');
     }
 
     if (!formData.dueDate) {
-      newErrors.dueDate = 'Due date is required';
+      newErrors.dueDate = t('invoice.errors.dueDateRequired', 'Due date is required');
     }
 
     formData.items.forEach((item, index) => {
       if (!item.description.trim()) {
-        newErrors[`item_${index}_description`] = 'Description is required';
+        newErrors[`item_${index}_description`] = t('invoice.errors.descriptionRequired', 'Description is required');
       }
       if (item.quantity <= 0) {
-        newErrors[`item_${index}_quantity`] = 'Quantity must be greater than 0';
+        newErrors[`item_${index}_quantity`] = t('invoice.errors.quantityGtZero', 'Quantity must be greater than 0');
       }
       if (item.unitPrice <= 0) {
-        newErrors[`item_${index}_unitPrice`] = 'Unit price must be greater than 0';
+        newErrors[`item_${index}_unitPrice`] = t('invoice.errors.unitPriceGtZero', 'Unit price must be greater than 0');
       }
     });
 
@@ -143,22 +145,24 @@ export const InvoiceFormPage: React.FC = () => {
     e.preventDefault();
 
     if (!validateForm()) {
-      setToast({ message: 'Please fix the errors in the form', type: 'error' });
+      setToast({ message: t('invoice.errors.fixForm', 'Please fix the errors in the form'), type: 'error' });
       return;
     }
 
     try {
       if (isEditMode && id) {
         await invoiceAPI.update(id, formData);
-        setToast({ message: 'Invoice updated successfully!', type: 'success' });
+        setToast({ message: t('messages.invoiceUpdated', 'Invoice updated successfully!'), type: 'success' });
       } else {
         await invoiceAPI.create(formData);
-        setToast({ message: 'Invoice created successfully!', type: 'success' });
+        setToast({ message: t('messages.invoiceCreated', 'Invoice created successfully!'), type: 'success' });
       }
       setTimeout(() => navigate('/invoices'), 1000);
     } catch (error: any) {
       setToast({
-        message: error.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} invoice`,
+        message:
+          error.response?.data?.error ||
+          (isEditMode ? t('messages.updateInvoiceFailed', 'Failed to update invoice') : t('messages.createInvoiceFailed', 'Failed to create invoice')),
         type: 'error',
       });
     }
@@ -178,18 +182,18 @@ export const InvoiceFormPage: React.FC = () => {
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          {isEditMode ? 'Edit Invoice' : 'Create New Invoice'}
+          {isEditMode ? t('invoice.editTitle', 'Edit Invoice') : t('invoice.createTitle', 'Create New Invoice')}
         </h1>
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Invoice Details</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('invoice.detailsTitle', 'Invoice Details')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Select
-              label="Customer *"
+              label={t('invoice.customerLabel', 'Customer *')}
               options={[
-                { value: '', label: 'Select a customer' },
+                { value: '', label: t('invoice.selectCustomer', 'Select a customer') },
                 ...customers.map((c) => ({ value: c.id, label: c.name })),
               ]}
               value={formData.customerId}
@@ -197,32 +201,32 @@ export const InvoiceFormPage: React.FC = () => {
               error={errors.customerId}
             />
             <Input
-              label="Invoice Number *"
+              label={t('invoice.numberLabel', 'Invoice Number *')}
               value={formData.number}
               onChange={(e) => setFormData({ ...formData, number: e.target.value })}
               error={errors.number}
             />
             <Input
-              label="Invoice Date *"
+              label={t('invoice.dateLabel', 'Invoice Date *')}
               type="date"
-              value={formData.date}
+              value={typeof formData.date === 'string' ? formData.date : (formData.date instanceof Date ? formData.date.toISOString().split('T')[0] : new Date(String(formData.date)).toISOString().split('T')[0])}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               error={errors.date}
             />
             <Input
-              label="Due Date *"
+              label={t('invoice.dueDateLabel', 'Due Date *')}
               type="date"
-              value={formData.dueDate}
+              value={typeof formData.dueDate === 'string' ? formData.dueDate : (formData.dueDate instanceof Date ? formData.dueDate.toISOString().split('T')[0] : new Date(String(formData.dueDate)).toISOString().split('T')[0])}
               onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
               error={errors.dueDate}
             />
             <Select
-              label="Status"
+              label={t('invoice.statusLabel', 'Status')}
               options={[
-                { value: 'DRAFT', label: 'Draft' },
-                { value: 'SENT', label: 'Sent' },
-                { value: 'PAID', label: 'Paid' },
-                { value: 'CANCELLED', label: 'Cancelled' },
+                { value: 'DRAFT', label: t('invoice.statuses.DRAFT', 'Draft') },
+                { value: 'SENT', label: t('invoice.statuses.SENT', 'Sent') },
+                { value: 'PAID', label: t('invoice.statuses.PAID', 'Paid') },
+                { value: 'CANCELLED', label: t('invoice.statuses.CANCELLED', 'Cancelled') },
               ]}
               value={formData.status}
               onChange={(e) =>
@@ -234,9 +238,9 @@ export const InvoiceFormPage: React.FC = () => {
 
         <Card className="mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Line Items</h2>
+            <h2 className="text-xl font-semibold">{t('invoice.lineItemsTitle', 'Line Items')}</h2>
             <Button type="button" size="sm" onClick={addItem}>
-              + Add Item
+              + {t('invoice.addItem', 'Add Item')}
             </Button>
           </div>
 
@@ -246,7 +250,7 @@ export const InvoiceFormPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                   <div className="md:col-span-5">
                     <Input
-                      label="Description *"
+                      label={t('invoice.item.descriptionLabel', 'Description *')}
                       value={item.description}
                       onChange={(e) =>
                         handleItemChange(index, 'description', e.target.value)
@@ -256,7 +260,7 @@ export const InvoiceFormPage: React.FC = () => {
                   </div>
                   <div className="md:col-span-2">
                     <Input
-                      label="Quantity *"
+                      label={t('invoice.item.quantityLabel', 'Quantity *')}
                       type="number"
                       min="1"
                       value={item.quantity}
@@ -268,7 +272,7 @@ export const InvoiceFormPage: React.FC = () => {
                   </div>
                   <div className="md:col-span-2">
                     <Input
-                      label="Unit Price *"
+                      label={t('invoice.item.unitPriceLabel', 'Unit Price *')}
                       type="number"
                       step="0.01"
                       min="0"
@@ -281,7 +285,7 @@ export const InvoiceFormPage: React.FC = () => {
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Total
+                      {t('invoice.item.totalLabel', 'Total')}
                     </label>
                     <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-100">
                       ${item.total.toFixed(2)}
@@ -305,7 +309,7 @@ export const InvoiceFormPage: React.FC = () => {
 
           <div className="mt-6 flex justify-end">
             <div className="text-right">
-              <div className="text-sm text-gray-600">Total Amount</div>
+        <div className="text-sm text-gray-600">{t('invoice.totalAmountLabel', 'Total Amount')}</div>
               <div className="text-2xl font-bold text-gray-900">
                 ${formData.totalAmount.toFixed(2)}
               </div>
@@ -315,14 +319,14 @@ export const InvoiceFormPage: React.FC = () => {
 
         <div className="flex gap-4">
           <Button type="submit" className="flex-1">
-            {isEditMode ? 'Update Invoice' : 'Create Invoice'}
+            {isEditMode ? t('invoice.updateButton', 'Update Invoice') : t('invoice.createButton', 'Create Invoice')}
           </Button>
           <Button
             type="button"
             variant="secondary"
             onClick={() => navigate('/invoices')}
           >
-            Cancel
+            {t('common.cancel', 'Cancel')}
           </Button>
         </div>
       </form>
