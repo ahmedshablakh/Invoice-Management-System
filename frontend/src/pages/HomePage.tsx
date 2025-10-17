@@ -14,6 +14,7 @@ export const HomePage: React.FC = () => {
         </p>
       </div>
 
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         <Card className="text-center">
           <div className="text-5xl mb-4">👥</div>
@@ -54,3 +55,5 @@ export const HomePage: React.FC = () => {
     </div>
   );
 };
+
+
