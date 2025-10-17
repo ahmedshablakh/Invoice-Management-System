@@ -10,6 +10,11 @@ import { Loading } from '../components/Loading';
 import { Toast } from '../components/Toast';
 import { formatCurrency, formatDate, getStatusColor } from '../utils/helpers';
 
+// Responsive InvoiceListPage
+// - Filters stack on small screens and form a grid on md+
+// - Table replaced with responsive list cards on xs/sm for better readability
+// - Actions become touch-friendly buttons, stacked on very small screens
+
 export const InvoiceListPage: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +30,7 @@ export const InvoiceListPage: React.FC = () => {
 
   useEffect(() => {
     fetchInvoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchInvoices = async (customFilters?: InvoiceFilters) => {
@@ -76,19 +82,16 @@ export const InvoiceListPage: React.FC = () => {
     try {
       setDownloadingPDFs(prev => new Set(prev).add(invoice.id));
       const blob = await invoiceAPI.exportPDF(invoice.id);
-      
-      // Create download link
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `invoice-${invoice.number}.pdf`;
       document.body.appendChild(link);
       link.click();
-      
-      // Cleanup
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       setToast({ message: 'PDF downloaded successfully!', type: 'success' });
     } catch (error) {
       setToast({ message: 'Failed to download PDF', type: 'error' });
@@ -113,21 +116,24 @@ export const InvoiceListPage: React.FC = () => {
         />
       )}
 
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Invoices</h1>
-          <Link to="/invoices/new">
-            <Button>+ New Invoice</Button>
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Invoices</h1>
+          <Link to="/invoices/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">+ New Invoice</Button>
           </Link>
         </div>
 
         <Card>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Filters: responsive grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <Input
-              placeholder="Search..."
+              placeholder="Search by customer, number..."
               value={filters.search || ''}
               onChange={(e) => handleFilterChange('search', e.target.value)}
+              className="w-full"
             />
+
             <Select
               options={[
                 { value: '', label: 'All Statuses' },
@@ -137,10 +143,9 @@ export const InvoiceListPage: React.FC = () => {
                 { value: 'CANCELLED', label: 'Cancelled' },
               ]}
               value={filters.status || ''}
-              onChange={(e) =>
-                handleFilterChange('status', e.target.value || undefined)
-              }
+              onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
             />
+
             <Select
               options={[
                 { value: 'date', label: 'Sort by Date' },
@@ -151,6 +156,7 @@ export const InvoiceListPage: React.FC = () => {
               value={filters.sortBy || 'date'}
               onChange={(e) => handleFilterChange('sortBy', e.target.value)}
             />
+
             <Select
               options={[
                 { value: 'desc', label: 'Descending' },
@@ -160,7 +166,8 @@ export const InvoiceListPage: React.FC = () => {
               onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
             />
           </div>
-          <div className="mt-4">
+
+          <div className="mt-4 flex justify-start">
             <Button variant="secondary" size="sm" onClick={handleClearFilters}>
               Clear Filters
             </Button>
@@ -170,101 +177,85 @@ export const InvoiceListPage: React.FC = () => {
 
       {invoices.length === 0 ? (
         <Card>
-          <p className="text-center text-gray-500 py-8">
-            No invoices found. Create your first invoice to get started!
-          </p>
+          <p className="text-center text-gray-500 py-8">No invoices found. Create your first invoice to get started!</p>
         </Card>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Invoice #
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {invoices.map((invoice) => (
-                <tr key={invoice.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {invoice.number}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {invoice.customer?.name || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(invoice.date)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(invoice.dueDate)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                    {formatCurrency(Number(invoice.totalAmount))}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                        invoice.status
-                      )}`}
-                    >
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex gap-2 justify-end">
-                      <Button
-                        size="sm"
-                        variant="success"
-                        onClick={() => handleDownloadPDF(invoice)}
-                        isLoading={downloadingPDFs.has(invoice.id)}
-                        title="Download PDF"
-                      >
-                        📄
-                      </Button>
-                      <Link to={`/invoices/${invoice.id}`}>
-                        <Button size="sm" variant="secondary">
-                          View
-                        </Button>
-                      </Link>
-                      <Link to={`/invoices/${invoice.id}/edit`}>
-                        <Button size="sm" variant="secondary">
-                          Edit
-                        </Button>
-                      </Link>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleDelete(invoice.id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
+        <>
+          {/* Desktop/table view */}
+          <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {invoices.map((invoice) => (
+                  <tr key={invoice.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{invoice.number}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{invoice.customer?.name || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(invoice.date)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(invoice.dueDate)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(Number(invoice.totalAmount))}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(invoice.status)}`}>
+                        {invoice.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex gap-2 justify-end">
+                        <Button size="sm" variant="success" onClick={() => handleDownloadPDF(invoice)} isLoading={downloadingPDFs.has(invoice.id)}>PDF</Button>
+                      
+                      <Button size="sm" variant="danger" onClick={() => handleDelete(invoice.id)}>Delete</Button>
+                      <Link to={`/invoices/${invoice.id}`}><Button size="sm" variant="secondary">View</Button></Link>
+                      <Link to={`/invoices/${invoice.id}/edit`}><Button size="sm" variant="secondary">Edit</Button></Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile/Tablet card list */}
+          <div className="lg:hidden space-y-4">
+            {invoices.map((invoice) => (
+              <Card key={invoice.id}>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 truncate">#{invoice.number} • {invoice.customer?.name || 'N/A'}</p>
+                        <p className="text-xs text-gray-500">{formatDate(invoice.date)} • Due {formatDate(invoice.dueDate)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold">{formatCurrency(Number(invoice.totalAmount))}</p>
+                        <span className={`mt-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(invoice.status)}`}>{invoice.status}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                       <Link to={`/invoices/${invoice.id}`}><Button size="sm" variant="secondary">View</Button></Link>
+                      <Link to={`/invoices/${invoice.id}/edit`}><Button size="sm" variant="secondary">Edit</Button></Link>
+                      <Button size="sm" variant="success" onClick={() => handleDownloadPDF(invoice)} isLoading={downloadingPDFs.has(invoice.id)}>PDF</Button>
+                      <Button size="sm" variant="danger" onClick={() => handleDelete(invoice.id)}>Delete</Button>
+                     
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
 };
+
+export default InvoiceListPage;

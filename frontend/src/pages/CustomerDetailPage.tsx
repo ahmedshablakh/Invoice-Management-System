@@ -4,10 +4,15 @@ import { customerAPI, invoiceAPI } from '../services/api';
 import { Customer, Invoice } from '../types';
 import { Button, Card, Loading, Toast } from '../components';
 
+// Responsive CustomerDetailPage
+// - Layout stacks on small screens, becomes two-column on md+
+// - Invoice list: table on lg+, card list on smaller screens
+// - Buttons and actions are touch-friendly and full-width on xs
+
 export const CustomerDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  
+
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +23,7 @@ export const CustomerDetailPage: React.FC = () => {
       fetchCustomer(id);
       fetchCustomerInvoices(id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchCustomer = async (customerId: string) => {
@@ -107,165 +113,152 @@ export const CustomerDetailPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
 
-      <div className="mb-6 flex justify-between items-center">
-        <div>
+      {/* Header */}
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="w-full">
           <button
             onClick={() => navigate('/customers')}
             className="text-blue-600 hover:text-blue-800 mb-2 flex items-center"
           >
             ← Back to Customers
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">{customer.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{customer.name}</h1>
         </div>
-        <div className="flex gap-3">
-          <Button variant="danger" onClick={handleDelete}>
-            Delete Customer
-          </Button>
+
+        <div className="w-full sm:w-auto flex gap-3 flex-col sm:flex-row">
+          <Link to={`/invoices/new`} state={{ customerId: customer.id }} className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">+ New Invoice</Button>
+          </Link>
+          <Button variant="danger" onClick={handleDelete} className="w-full sm:w-auto">Delete Customer</Button>
         </div>
       </div>
 
-      {/* Customer Information Card */}
-      <Card className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Customer Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <p className="text-gray-900">{customer.email}</p>
-          </div>
-          {customer.taxNumber && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tax Number</label>
-              <p className="text-gray-900">{customer.taxNumber}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Left / main: Customer info and summary */}
+        <div className="lg:col-span-2 space-y-4">
+          <Card>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Customer Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <p className="text-gray-900 break-words">{customer.email}</p>
+              </div>
+              {customer.taxNumber && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tax Number</label>
+                  <p className="text-gray-900 break-words">{customer.taxNumber}</p>
+                </div>
+              )}
+              {customer.address && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <p className="text-gray-900 break-words">{customer.address}</p>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Created</label>
+                <p className="text-gray-900">{formatDate(customer.createdAt)}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                <p className="text-gray-900">{formatDate(customer.updatedAt)}</p>
+              </div>
             </div>
-          )}
-          {customer.address && (
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-              <p className="text-gray-900">{customer.address}</p>
-            </div>
-          )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Created</label>
-            <p className="text-gray-900">{formatDate(customer.createdAt)}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
-            <p className="text-gray-900">{formatDate(customer.updatedAt)}</p>
-          </div>
-        </div>
-      </Card>
+          </Card>
 
-      {/* Invoices Summary Card */}
-      <Card className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Invoice Summary</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-1">Total Invoices</p>
-            <p className="text-2xl font-bold text-gray-900">{invoices.length}</p>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-1">Paid Invoices</p>
-            <p className="text-2xl font-bold text-green-700">
-              {invoices.filter((inv) => inv.status === 'PAID').length}
-            </p>
-          </div>
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-1">Total Amount</p>
-            <p className="text-2xl font-bold text-blue-700">{formatCurrency(calculateTotalAmount())}</p>
-          </div>
-        </div>
-      </Card>
+          <Card>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Invoices</h2>
 
-      {/* Invoices List */}
-      <Card>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Invoices</h2>
-          <Link to="/invoices/new" state={{ customerId: customer.id }}>
-            <Button>+ New Invoice</Button>
-          </Link>
-        </div>
+            {invoices.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No invoices found for this customer.</p>
+            ) : (
+              <>
+                {/* Table for large screens */}
+                <div className="hidden lg:block overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Number</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {invoices.map((invoice) => (
+                        <tr key={invoice.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{invoice.number}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(invoice.date)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(invoice.dueDate)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(invoice.status)}`}>{invoice.status}</span></td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(Number(invoice.totalAmount))}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex gap-2">
+                              <Link to={`/invoices/${invoice.id}`}><Button size="sm" variant="secondary">View</Button></Link>
+                              <Link to={`/invoices/${invoice.id}/edit`}><Button size="sm" variant="secondary">Edit</Button></Link>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-        {invoices.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">
-            No invoices found for this customer.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Invoice Number
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Due Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {invoices.map((invoice) => (
-                  <tr key={invoice.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {invoice.number}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(invoice.date)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(invoice.dueDate)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                          invoice.status
-                        )}`}
-                      >
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(Number(invoice.totalAmount))}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex gap-2">
-                        <Link to={`/invoices/${invoice.id}`}>
-                          <Button size="sm" variant="secondary">
-                            View
-                          </Button>
-                        </Link>
-                        <Link to={`/invoices/${invoice.id}/edit`}>
-                          <Button size="sm" variant="secondary">
-                            Edit
-                          </Button>
-                        </Link>
+                {/* Card list for mobile/tablet */}
+                <div className="lg:hidden space-y-4">
+                  {invoices.map((invoice) => (
+                    <Card key={invoice.id}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">#{invoice.number}</p>
+                          <p className="text-xs text-gray-500">{formatDate(invoice.date)} • Due {formatDate(invoice.dueDate)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold">{formatCurrency(Number(invoice.totalAmount))}</p>
+                          <span className={`mt-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(invoice.status)}`}>{invoice.status}</span>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <Link to={`/invoices/${invoice.id}`}><Button size="sm" className="w-full">View</Button></Link>
+                        <Link to={`/invoices/${invoice.id}/edit`}><Button size="sm" className="w-full">Edit</Button></Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            )}
+          </Card>
+        </div>
+
+        {/* Right: Summary widgets */}
+        <div className="space-y-4">
+          <Card>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Invoice Summary</h2>
+            <div className="grid grid-cols-1 gap-3">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-600">Total Invoices</p>
+                <p className="text-xl font-bold text-gray-900">{invoices.length}</p>
+              </div>
+              <div className="bg-green-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-600">Paid Invoices</p>
+                <p className="text-xl font-bold text-green-700">{invoices.filter((inv) => inv.status === 'PAID').length}</p>
+              </div>
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-600">Total Amount</p>
+                <p className="text-xl font-bold text-blue-700">{formatCurrency(calculateTotalAmount())}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
+
+export default CustomerDetailPage;

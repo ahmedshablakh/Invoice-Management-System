@@ -32,10 +32,12 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
+      {/* MODIFIED: Added animation classes for a subtle fade-in effect */}
+      <div className="max-w-md w-full transition-all duration-500 ease-in-out transform animate-fadeIn">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Invoice Manager</h1>
-          <h2 className="text-2xl font-semibold text-gray-700">Sign in to your account</h2>
+          {/* MODIFIED: Made typography responsive. Smaller on mobile, larger on bigger screens. */}
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Invoice Manager</h1>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-700">Sign in to your account</h2>
         </div>
 
         <Card>
@@ -68,7 +70,7 @@ export const LoginPage: React.FC = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
                 Sign up
               </Link>
             </p>

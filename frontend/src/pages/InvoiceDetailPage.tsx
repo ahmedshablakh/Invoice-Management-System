@@ -54,7 +54,6 @@ export const InvoiceDetailPage: React.FC = () => {
       setIsDownloadingPDF(true);
       const blob = await invoiceAPI.exportPDF(id);
       
-      // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -62,7 +61,6 @@ export const InvoiceDetailPage: React.FC = () => {
       document.body.appendChild(link);
       link.click();
       
-      // Cleanup
       link.remove();
       window.URL.revokeObjectURL(url);
       
@@ -87,11 +85,13 @@ export const InvoiceDetailPage: React.FC = () => {
         />
       )}
 
-      <div className="mb-6 flex justify-between items-center">
+      {/* MODIFIED: Flex container now stacks vertically on small screens */}
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <Button variant="secondary" onClick={() => navigate('/invoices')}>
           ← Back to Invoices
         </Button>
-        <div className="flex gap-2">
+        {/* MODIFIED: Button group wraps and justifies center on small screens */}
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-center sm:justify-end">
           <Button 
             variant="success" 
             onClick={handleDownloadPDF}
@@ -109,7 +109,8 @@ export const InvoiceDetailPage: React.FC = () => {
       </div>
 
       <Card className="mb-6">
-        <div className="flex justify-between items-start mb-6">
+        {/* MODIFIED: Header now stacks vertically on small screens */}
+        <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4 sm:gap-0">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Invoice {invoice.number}
@@ -122,7 +123,8 @@ export const InvoiceDetailPage: React.FC = () => {
               {invoice.status}
             </span>
           </div>
-          <div className="text-right">
+          {/* MODIFIED: Text alignment is responsive now */}
+          <div className="text-left sm:text-right w-full sm:w-auto">
             <div className="text-sm text-gray-600">Total Amount</div>
             <div className="text-3xl font-bold text-gray-900">
               {formatCurrency(Number(invoice.totalAmount))}
@@ -130,6 +132,7 @@ export const InvoiceDetailPage: React.FC = () => {
           </div>
         </div>
 
+        {/* This grid is already responsive, no changes needed */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-2">Customer Information</h3>
@@ -175,6 +178,7 @@ export const InvoiceDetailPage: React.FC = () => {
 
       <Card>
         <h2 className="text-xl font-semibold mb-4">Line Items</h2>
+        {/* This container with overflow is a great way to handle tables on mobile */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
